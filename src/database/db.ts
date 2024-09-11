@@ -1,9 +1,9 @@
 import { open, Database } from "sqlite";
 import sqlite3 from "sqlite3";
-import fs from "fs";
 import path from "path";
 
-const DATABASE_URL = process.env.DATABASE_URL || "progress.db";
+const DATABASE_URL =
+  process.env.DATABASE_URL || path.join(__dirname, "progress.db");
 
 let database: Database | null = null;
 
@@ -16,9 +16,10 @@ let database: Database | null = null;
     });
 
     console.log("[db] connected to SQLite database…");
-
-    const sql = fs.readFileSync(path.join(__dirname, "setup.sql"), "utf8");
-    await database.exec(sql);
+    console.log("[db] running migrations…");
+    await database.migrate({
+      migrationsPath: path.join(__dirname, "migrations"),
+    });
     console.log("[db] successfully set up SQLite database!");
   } catch (err) {
     console.error("[db] error setting up the database!");

@@ -5,7 +5,7 @@ import * as updateController from "../controllers/update";
 
 const router = Router();
 
-router.get("/", monitorController.getMonitors);
+router.get("/", monitorController.listMonitors);
 router.post("/", monitorController.createMonitor);
 router.get("/status", monitorController.getAverageMonitorStatus);
 

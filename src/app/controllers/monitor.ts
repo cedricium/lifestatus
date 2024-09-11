@@ -4,7 +4,7 @@ import * as monitorService from "../../services/monitor";
 
 export async function getAverageMonitorStatus(req: Request, res: Response) {
   try {
-    const status = await monitorService.getCurrentAggregateStatus();
+    const status = await monitorService.getCurrentAverageStatus();
     return res.status(200).json({
       status,
       ranges: monitorService.STATUS_RANGES,
@@ -16,14 +16,12 @@ export async function getAverageMonitorStatus(req: Request, res: Response) {
   }
 }
 
-export async function getMonitors(req: Request, res: Response) {
+export async function listMonitors(req: Request, res: Response) {
   try {
     const monitors = await monitorService.getMonitors();
     return res.status(200).json({
-      monitors: monitors.map(({ status, ...rest }) => ({
-        ...rest,
-        status: monitorService.getStatusFromAverage(status),
-      })),
+      monitors,
+      ranges: monitorService.STATUS_RANGES,
     });
   } catch (err) {
     console.error("Error getting monitors: ", err);

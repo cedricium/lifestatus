@@ -2,7 +2,6 @@ import Sqids from "sqids";
 
 import { db } from "../database/db";
 import { Update } from "./types";
-import * as monitorService from "./monitor";
 
 const sqids = new Sqids({ minLength: 8 });
 const UPDATE_ENTITY_KEY = 2;
@@ -10,7 +9,7 @@ const UPDATE_ENTITY_KEY = 2;
 export async function createUpdate(
   monitorId: string,
   notes?: string
-): Promise<Update> {
+): Promise<Update | undefined> {
   const updateId = sqids.encode([Date.now(), UPDATE_ENTITY_KEY]);
   const timestamp = new Date();
 
@@ -19,7 +18,5 @@ export async function createUpdate(
     .map(() => "?")
     .join(", ")}) RETURNING *`;
 
-  const result = await db().get(sql, params);
-  await monitorService.updateMonitorStatus(monitorId);
-  return result;
+  return await db().get(sql, params);
 }

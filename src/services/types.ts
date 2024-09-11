@@ -5,8 +5,8 @@ export type Monitor = {
   period: number;
   frequency: number;
   created_at: number;
-  last_update_at?: number;
-  status: number;
+  last_update_at: number | null;
+  status: Status;
 };
 
 export type Update = {

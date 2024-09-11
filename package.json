@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "tsc && copyfiles -e '**/*.ts' -u 1 src/database/* dist/",
+    "build": "tsc && copyfiles -e '**/*.ts' -u 1 src/database/migrations/* dist/",
     "dev": "tsx watch src/index.ts",
     "start": "node ./dist/index.js",
     "test": "jest"

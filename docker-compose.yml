@@ -9,5 +9,5 @@ services:
       - NODE_ENV=production
       - PORT=8080
     volumes:
-      - ./progress.db:/usr/src/app/progress.db
+      - ./src/database/progress.db:/usr/src/app/dist/database/progress.db
     restart: unless-stopped

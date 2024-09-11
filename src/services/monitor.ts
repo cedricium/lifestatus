@@ -1,19 +1,23 @@
 import Sqids from "sqids";
 
 import { db } from "../database/db";
-import { Monitor, Status, StatusRange, Update } from "./types";
+import { Monitor, Status, StatusRange } from "./types";
+import { getAverageMonitorStatus, listMonitorsWithStatus } from "./monitor.sql";
 
 const sqids = new Sqids({ minLength: 8 });
 const MONITOR_ENTITY_KEY = 1;
 
 export async function getMonitors(): Promise<Monitor[]> {
-  const sql = `SELECT * FROM monitors ORDER BY status DESC`;
-  return await db().all(sql);
+  const monitors = await db().all(listMonitorsWithStatus);
+  return monitors.map((monitor) => ({
+    ...monitor,
+    status: getStatusRangeFromProgress(monitor.status),
+  }));
 }
 
-export async function getMonitorById(id: string): Promise<Monitor> {
-  const sql = `SELECT * FROM monitors WHERE id = ?`;
-  return await db().all(sql, id);
+export async function getCurrentAverageStatus(): Promise<Status | undefined> {
+  const result = await db().get(getAverageMonitorStatus);
+  return getStatusRangeFromProgress(result.avg);
 }
 
 export async function createMonitor(
@@ -21,8 +25,13 @@ export async function createMonitor(
 ): Promise<Monitor | undefined> {
   const { title, description, period, frequency } = data;
   const id = sqids.encode([Date.now(), MONITOR_ENTITY_KEY]);
-  let sql = `INSERT INTO monitors(id, title, description, created_at, last_update_at, status`;
-  let params = [id, title, description || null, new Date(), null, 0.0];
+  let sql = `INSERT INTO monitors(id, title, description, created_at`;
+  let params: (string | Date | number | null | undefined)[] = [
+    id,
+    title,
+    description || null,
+    new Date(),
+  ];
 
   if (period) {
     sql += `, period`;
@@ -35,42 +44,9 @@ export async function createMonitor(
 
   sql += `) VALUES(${params.map(() => "?").join(", ")}) RETURNING *`;
 
+  // TODO: won't return dynamic `status`—may want to pass to `getMonitorById` function
   return await db().get(sql, params);
 }
-
-export async function getCurrentAggregateStatus(): Promise<Status | undefined> {
-  const sql = `SELECT AVG(status) AS avg FROM monitors WHERE status > 0.0`;
-  const result = await db().get(sql);
-  return getStatusFromAverage(result.avg);
-}
-
-export async function updateMonitorStatus(monitorId: string) {
-  const monitor = await db().get(
-    "SELECT * FROM monitors WHERE id = ?",
-    monitorId
-  );
-  const updates = await db().all(
-    "SELECT * FROM updates WHERE monitor_id = ?",
-    // TODO: `WHERE timestamp >= Date.now() - (2 * periodInMS)`
-    monitorId
-  );
-
-  const status = calculateStatus(monitor, updates);
-  if (status !== monitor.status) {
-    await db().run(
-      `UPDATE monitors SET status = ? WHERE id = ?`,
-      status,
-      monitorId
-    );
-  }
-}
-
-const STATUSES = {
-  GETTING_STARTED: 0.0,
-  UNFOCUSED: 0.1,
-  REFOCUSING: 0.75,
-  MAKING_PROGRESS: 1.0,
-};
 
 export const STATUS_RANGES: StatusRange[] = [
   { min: -Infinity, max: 0.0, label: "Getting Started", color: "#FFC5E9" },
@@ -79,46 +55,16 @@ export const STATUS_RANGES: StatusRange[] = [
   { min: 0.76, max: 1.0, label: "Making Progress", color: "#2BAC76" },
 ];
 
-// TODO: rename to e.g. getStatusFromProgress(progress: number): Status {
-// given `progress` is all-encompassing of both aggregate and individual monitors health
-export function getStatusFromAverage(avg: number): Status {
+export function getStatusRangeFromProgress(progress: number): Status {
   const range = STATUS_RANGES.find(
-    (range) => avg >= range.min && avg <= range.max
+    (range) => progress >= range.min && progress <= range.max
   );
   if (!range) {
-    throw new Error(`Invalid average: ${avg}`);
+    throw new Error(`Invalid average: ${progress}`);
   }
   return {
-    value: avg,
+    value: progress,
     label: range.label,
     color: range.color,
   };
-}
-
-function hoursToMs(hours: number): number {
-  return hours * 60 * 60 * 1000;
-}
-
-export function calculateStatus(monitor: Monitor, updates: Update[]): number {
-  const periodInMs = hoursToMs(monitor.period);
-
-  const recentUpdates = updates.filter(
-    (update) => update.timestamp >= Date.now() - periodInMs
-  );
-
-  if (recentUpdates.length >= monitor.frequency)
-    return STATUSES.MAKING_PROGRESS;
-
-  const isFirstPeriod =
-    !monitor.last_update_at && Date.now() < monitor.created_at + periodInMs;
-  if (isFirstPeriod) return STATUSES.GETTING_STARTED;
-
-  const pastPeriodUpdates = updates.filter(
-    (update) =>
-      update.timestamp <= monitor.last_update_at! &&
-      update.timestamp >= monitor.last_update_at! - periodInMs
-  );
-
-  if (pastPeriodUpdates.length >= monitor.frequency) return STATUSES.REFOCUSING;
-  return STATUSES.UNFOCUSED;
 }
