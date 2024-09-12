@@ -18,7 +18,7 @@
         const [monitors, setMonitors] = React.useState([]);
         React.useEffect(() => {
           async function fetchMonitors() {
-            const response = await fetch("http://localhost:8080/v1/monitors");
+            const response = await fetch("http://pi.local:8080/v1/monitors");
             if (!response.ok) {
               throw new Error("failed to fetch!");
             }
@@ -38,7 +38,7 @@
             formData.get("key") || localStorage.getItem("LIFESTATUS_API_KEY");
 
           const response = await fetch(
-            `http://localhost:8080/v1/monitors/${monitor_id}/updates`,
+            `http://pi.local:8080/v1/monitors/${monitor_id}/updates`,
             {
               method: "POST",
               headers: {
@@ -56,7 +56,7 @@
         }
 
         return (
-          <>
+          <main>
             <h1>🚦 LifeStatus - Admin</h1>
 
             <form action={recordUpdate}>
@@ -91,7 +91,7 @@
                 <button type="submit">Submit</button>
               </div>
             </form>
-          </>
+          </main>
         );
       }
 
