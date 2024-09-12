@@ -11,9 +11,11 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 
   const credentials = authorization.split(" ")[1];
-  const [apiKey] = Buffer.from(credentials, "base64")
-    .toString("ascii")
-    .split(":");
+  const [apiKey] = (
+    req.secure
+      ? Buffer.from(credentials, "base64").toString("ascii")
+      : credentials
+  ).split(":");
 
   if (apiKey === process.env.API_KEY) {
     return next();

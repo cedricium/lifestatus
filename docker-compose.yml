@@ -11,3 +11,9 @@ services:
     volumes:
       - ./src/database/progress.db:/usr/src/app/dist/database/progress.db
     restart: unless-stopped
+
+  admin:
+    build: ./admin
+    ports:
+      - "8081:80"
+    restart: unless-stopped

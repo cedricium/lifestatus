@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LifeStatus Admin</title>
+
+    <script src="https://unpkg.com/react@18.3.0-canary-670811593-20240322/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18.3.0-canary-670811593-20240322/umd/react-dom.production.min.js"></script>
+
+    <!-- Don't use this in production: -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      function MyApp() {
+        const [monitors, setMonitors] = React.useState([]);
+        React.useEffect(() => {
+          async function fetchMonitors() {
+            const response = await fetch("http://localhost:8080/v1/monitors");
+            if (!response.ok) {
+              throw new Error("failed to fetch!");
+            }
+            const data = await response.json();
+            setMonitors(data.monitors);
+
+            return () => {};
+          }
+
+          fetchMonitors();
+        }, []);
+
+        async function recordUpdate(formData) {
+          const monitor_id = formData.get("monitor_id");
+          const notes = formData.get("notes");
+          const apiKey =
+            formData.get("key") || localStorage.getItem("LIFESTATUS_API_KEY");
+
+          const response = await fetch(
+            `http://localhost:8080/v1/monitors/${monitor_id}/updates`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Basic ${apiKey}:`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ notes }),
+            }
+          );
+          if (!response.ok) {
+            throw new Error("failed to record update!");
+          }
+          const data = await response.json();
+          location.reload();
+        }
+
+        return (
+          <>
+            <h1>🚦 LifeStatus - Admin</h1>
+
+            <form action={recordUpdate}>
+              <p>
+                <label htmlFor="monitor">
+                  <strong>Monitor: </strong>
+                </label>
+                <select name="monitor_id" id="monitor">
+                  {monitors.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.title}
+                    </option>
+                  ))}
+                </select>
+              </p>
+
+              <p>
+                <label htmlFor="key">
+                  <strong>API Key: </strong>
+                </label>
+                <input
+                  id="key"
+                  name="key"
+                  type="password"
+                  placeholder="************"
+                />
+              </p>
+
+              <textarea name="notes" rows={3} cols={32} />
+
+              <div>
+                <button type="submit">Submit</button>
+              </div>
+            </form>
+          </>
+        );
+      }
+
+      const container = document.getElementById("root");
+      const root = ReactDOM.createRoot(container);
+      root.render(<MyApp />);
+    </script>
+  </body>
+</html>
