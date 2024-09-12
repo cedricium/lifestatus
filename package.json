@@ -5,8 +5,8 @@
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsc && copyfiles -e '**/*.ts' -u 1 src/database/migrations/* dist/",
-    "dev": "tsx watch src/index.ts",
-    "start": "node ./dist/index.js",
+    "dev": "tsx watch --env-file=.env src/index.ts",
+    "start": "node --env-file=.env ./dist/index.js",
     "test": "jest"
   },
   "author": "Cedric Amaya (@cedricium)",
