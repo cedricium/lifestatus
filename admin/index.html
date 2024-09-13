@@ -42,7 +42,7 @@
             {
               method: "POST",
               headers: {
-                Authorization: `Basic ${apiKey}:`,
+                Authorization: `Basic ${btoa(apiKey + ":")}`,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({ notes }),
