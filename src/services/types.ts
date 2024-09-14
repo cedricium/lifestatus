@@ -23,8 +23,18 @@ export type StatusRange = {
   color: string;
 };
 
+/**
+ * e.g. "#2BAC76"
+ */
+type CSSHexColor = string;
+
 export type Status = {
   value: number;
   label: string;
-  color: string;
+  color: CSSHexColor;
+};
+
+export type Snapshot = Pick<Status, "value" | "label" | "color"> & {
+  id: string;
+  created_at: Date;
 };

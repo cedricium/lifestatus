@@ -1,5 +1,6 @@
 import app from "./app";
 import { db } from "./database/db";
+import { nightlySnapshot } from "./jobs/snapshot";
 
 const PORT = process.env.PORT || 3000;
 const { API_KEY } = process.env;
@@ -18,6 +19,7 @@ const server = app
   });
 
 process.on("SIGTERM", async () => {
+  nightlySnapshot.stop();
   await db().close();
   server.close();
 });
