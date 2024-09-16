@@ -8,7 +8,7 @@ const SNAPSHOT_ENTITY_KEY = 3;
 
 export async function findAll(limit: number = 60): Promise<Snapshot[]> {
   const sql = `
-    SELECT created_at, value, color
+    SELECT *
     FROM snapshots
     WHERE created_at >= date('now', '-${limit} days')
     ORDER BY created_at ASC

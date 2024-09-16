@@ -34,7 +34,7 @@ export type Status = {
   color: CSSHexColor;
 };
 
-export type Snapshot = Pick<Status, "value" | "label" | "color"> & {
+export type Snapshot = Status & {
   id: string;
   created_at: Date;
 };

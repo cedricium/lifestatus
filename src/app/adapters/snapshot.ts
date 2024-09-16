@@ -23,19 +23,11 @@ export function toChartData(
     const dateStr = formatDate(d);
     const data = dataMap.get(dateStr);
 
-    if (data) {
-      result.push({
-        date: dateStr,
-        avg: Math.round(data.value * 100),
-        fill: data.color,
-      });
-    } else {
-      result.push({
-        date: dateStr,
-        avg: undefined,
-        fill: undefined,
-      });
-    }
+    result.push({
+      date: dateStr,
+      avg: data && Math.round(data.value * 100),
+      fill: data && data.color,
+    });
   }
 
   return result;
