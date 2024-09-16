@@ -4,7 +4,7 @@ import { getCurrentAverageStatus } from "../services/monitor";
 import { create } from "../services/snapshot";
 
 export const nightlySnapshot = new CronJob(
-  "0 0 0 * * *",
+  "0 59 23 * * *",
   async () => {
     try {
       const status = await getCurrentAverageStatus();

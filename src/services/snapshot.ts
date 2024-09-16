@@ -22,7 +22,7 @@ export async function create(status: Status): Promise<Snapshot | undefined> {
   const id = sqids.encode([Date.now(), SNAPSHOT_ENTITY_KEY]);
 
   let sql = `INSERT INTO snapshots(id, created_at, value, label, color) VALUES(?, ?, ?, ?, ?) RETURNING *`;
-  let params = [id, new Date(), value, label, color];
+  let params = [id, new Date().toISOString(), value, label, color];
 
   return await db().get(sql, params);
 }
