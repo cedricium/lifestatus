@@ -20,7 +20,7 @@ SELECT
         -- Enough updates in current period
         WHEN current_period_count >= m.frequency THEN 1.0
         -- Not enough updates in current period but enough in past period
-        WHEN current_period_count < m.frequency AND past_period_count >= m.frequency THEN 0.75
+        WHEN current_period_count < m.frequency AND current_period_count + past_period_count >= m.frequency THEN 0.75
         -- No recent or past updates
         ELSE 0.1
     END AS status
