@@ -3,8 +3,8 @@ const baseQuery = `WITH recent_updates AS (
       m.id AS monitor_id,
       MAX(u.timestamp) AS last_update_at,
       COUNT(u.id) AS recent_update_count,
-      COUNT(CASE WHEN u.timestamp >= (strftime('%s', 'now') * 1000) - (m.period * 3600000) THEN 1 END) AS current_period_count,
-      COUNT(CASE WHEN u.timestamp < (strftime('%s', 'now') * 1000) - (m.period * 3600000) AND u.timestamp >= (strftime('%s', 'now') * 1000) - (2 * m.period * 3600000) THEN 1 END) AS past_period_count
+      COUNT(CASE WHEN u.timestamp >= (unixepoch('now') * 1000) - (m.period * 3600000) THEN 1 END) AS current_period_count,
+      COUNT(CASE WHEN u.timestamp < (unixepoch('now') * 1000) - (m.period * 3600000) AND u.timestamp >= (unixepoch('now') * 1000) - (2 * m.period * 3600000) THEN 1 END) AS past_period_count
   FROM monitors m
   LEFT JOIN updates u ON m.id = u.monitor_id
   GROUP BY m.id
@@ -16,7 +16,7 @@ SELECT
     r.last_update_at AS last_update_at,
     CASE
         -- First period, not enough updates
-        WHEN (strftime('%s', 'now') * 1000) < (m.created_at + m.period * 3600000) AND recent_update_count < m.frequency THEN 0.0
+        WHEN (unixepoch('now') * 1000) < (m.created_at + m.period * 3600000) AND recent_update_count < m.frequency THEN 0.0
         -- Enough updates in current period
         WHEN current_period_count >= m.frequency THEN 1.0
         -- Not enough updates in current period but enough in past period
@@ -34,7 +34,7 @@ export const getAverageMonitorStatus = `${baseQuery}
       m.*,
       CASE
           -- First period, not enough updates
-          WHEN (strftime('%s', 'now') * 1000) < (m.created_at + m.period * 3600000) AND recent_update_count < m.frequency THEN 0.0
+          WHEN (unixepoch('now') * 1000) < (m.created_at + m.period * 3600000) AND recent_update_count < m.frequency THEN 0.0
           -- Enough updates in current period
           WHEN current_period_count >= m.frequency THEN 1.0
           -- Not enough updates in current period but enough in past period
