@@ -17,7 +17,7 @@ update: stop
 	git pull
 
 logs:
-	docker compose logs lifestatus-app-1 -f
+	docker logs lifestatus-app-1 -f
 
 shell:
 	docker exec -it lifestatus-app-1 sh
