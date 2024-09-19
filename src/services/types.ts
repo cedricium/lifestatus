@@ -14,6 +14,7 @@ export type Update = {
   monitor_id: string;
   timestamp: number;
   notes?: string;
+  monitor?: string;
 };
 
 export type StatusRange = {
