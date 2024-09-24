@@ -1,4 +1,4 @@
-import { Snapshot } from "../../services/types";
+import { Snapshot } from "../services/types";
 
 const PREV_DAYS_COUNT = 29;
 
