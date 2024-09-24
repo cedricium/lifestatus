@@ -15,7 +15,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "cron": "^3.1.7",
-    "express": "^4.19.2",
+    "express": "^5.0.0",
     "morgan": "^1.10.0",
     "sqids": "^0.3.0",
     "sqlite": "^5.1.1",
