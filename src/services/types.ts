@@ -39,3 +39,12 @@ export type Snapshot = Status & {
   id: string;
   created_at: Date;
 };
+
+export type EventSource = {
+  id: string;
+  monitor_id: string;
+  mechanism: "webhook" | "polling";
+  source: string;
+  frequency: number;
+  last_checked: Date;
+};

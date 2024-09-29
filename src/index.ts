@@ -1,6 +1,7 @@
 import app from "./app";
 import { db } from "./database/db";
 import { nightlySnapshot } from "./jobs/snapshot";
+import { eventSourcePolling } from "./jobs/events";
 
 const PORT = process.env.PORT || 3000;
 const { API_KEY } = process.env;
@@ -19,7 +20,10 @@ const server = app
   });
 
 process.on("SIGTERM", async () => {
+  // stop jobs
   nightlySnapshot.stop();
+  eventSourcePolling.stop();
+
   await db().close();
   server.close();
 });
