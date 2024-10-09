@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { DB as DatabaseProvider } from 'src/database/database';
 import { CreateMonitorDto } from './dto/create-monitor.dto';
 import { UpdateMonitorDto } from './dto/update-monitor.dto';
+import {
+  MonitorEntity,
+  getStatusRangeFromProgress,
+} from './entities/monitor.entity';
 
 const recentUpdatesCTE = `WITH recent_updates AS (
   SELECT
@@ -34,6 +38,10 @@ const listMonitorsWithStatus = `${recentUpdatesCTE}
 ${calculateStatus}
 ORDER BY status DESC`;
 
+const getAverageMonitorStatus = `${recentUpdatesCTE}
+, statuses AS (${calculateStatus})
+SELECT AVG(status) as status FROM statuses WHERE status > 0.0`;
+
 @Injectable()
 export class MonitorsService {
   constructor(private databaseProvider: DatabaseProvider) {}
@@ -44,11 +52,12 @@ export class MonitorsService {
 
   async findAll() {
     const result = await this.databaseProvider.db.all(listMonitorsWithStatus);
-    return result;
+    return result.map((m) => new MonitorEntity(m));
   }
 
-  getAverageStatus() {
-    return `This action computes the average status of all active monitors`;
+  async getAverageStatus() {
+    const result = await this.databaseProvider.db.get(getAverageMonitorStatus);
+    return getStatusRangeFromProgress(result.status);
   }
 
   update(id: number, updateMonitorDto: UpdateMonitorDto) {

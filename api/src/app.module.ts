@@ -8,7 +8,13 @@ import { SnapshotsModule } from './snapshots/snapshots.module';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [HealthcheckModule, MonitorsModule, UpdatesModule, SnapshotsModule, DatabaseModule],
+  imports: [
+    HealthcheckModule,
+    MonitorsModule,
+    UpdatesModule,
+    SnapshotsModule,
+    DatabaseModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

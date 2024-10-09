@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
 import { MonitorsService } from './monitors.service';
 import { CreateMonitorDto } from './dto/create-monitor.dto';
 import { UpdateMonitorDto } from './dto/update-monitor.dto';
+import { MonitorEntity, StatusEntity } from './entities/monitor.entity';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller({ path: 'monitors', version: '1' })
 export class MonitorsController {
   constructor(private readonly monitorsService: MonitorsService) {}
@@ -13,12 +24,12 @@ export class MonitorsController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<MonitorEntity[]> {
     return this.monitorsService.findAll();
   }
 
   @Get('/status')
-  getAverageStatus() {
+  getAverageStatus(): Promise<StatusEntity> {
     return this.monitorsService.getAverageStatus();
   }
 
