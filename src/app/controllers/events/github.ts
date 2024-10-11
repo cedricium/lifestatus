@@ -60,6 +60,7 @@ export async function handler(req: Request, res: Response) {
   const githubEvent = req.headers["x-github-event"];
   if (githubEvent === "push") {
     const data = req.body;
+    const repo = data?.repository.full_name;
     const commit = data?.head_commit || data.commits[0];
     const title = commit.message.split("\n")[0];
     const shortID = commit.id.substring(0, 7);
@@ -67,7 +68,7 @@ export async function handler(req: Request, res: Response) {
     console.log(
       `[GitHub] ${commit.timestamp} - push event received, sent by: ${data.repository.full_name}`
     );
-    const note = `${title} [${shortID}]\n\nautomated-via: GitHub`;
+    const note = `repo: ${repo}\n${title} [${shortID}]\n\nautomated-via: GitHub`;
     await createUpdate("RDoOqSJuer", note);
   } else if (githubEvent === "ping") {
     console.log(`[GitHub] ping event received`);
