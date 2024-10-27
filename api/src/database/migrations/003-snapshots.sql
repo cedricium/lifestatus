@@ -1,0 +1,11 @@
+-- In
+CREATE TABLE IF NOT EXISTS snapshots (
+  id TEXT PRIMARY KEY,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  value NUMBER NOT NULL,
+  label TEXT NOT NULL,
+  color TEXT NOT NULL
+);
+
+-- Down
+DROP TABLE IF EXISTS snapshots;
